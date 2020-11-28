@@ -1,2 +1,5 @@
-__pycache__/
+.idea/
+.vscode/
+Network/__init__.py
+test.py
 
