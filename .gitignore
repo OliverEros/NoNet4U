@@ -1,5 +1,8 @@
 .idea/
 .vscode/
 Network/__init__.py
+Network/__pycache__/
+__pycache__/
+..gitignore.swp
 test.py
 
