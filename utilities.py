@@ -1,6 +1,8 @@
 from subprocess import PIPE, call, check_output
 import netifaces
 import re
+import click
+import os
 
 from getmac import get_mac_address
 
@@ -13,24 +15,42 @@ def get_interface():
     gate = netifaces.gateways()
     if 'default' in gate and netifaces.AF_INET in gate['default']:
             return gate['default'][netifaces.AF_INET][1]
-
+    else:
+        return False
+    
+        
 def get_gateway():
     gate = netifaces.gateways()
     if 'default' in gate and netifaces.AF_INET in gate['default']:
             return gate['default'][netifaces.AF_INET][0]
+    else:
+        return False
+    
 
 def get_netmask(interface):
     netmask = netifaces.ifaddresses(interface)
     if netifaces.AF_INET in netmask:
         return netmask[netifaces.AF_INET][0]['netmask']
+    else:
+        return False
 
 def get_interface_MAC(interface):
     mac = netifaces.ifaddresses(interface)
     if netifaces.AF_LINK in mac:
         return mac[netifaces.AF_LINK][0]['addr']
+    else:
+        return False
 
 def get_user_MAC(host_ip):
-   return get_mac_address(ip= host_ip)
+   return str(get_mac_address(ip= host_ip))
+
+
+#IP FORWARDING FOR ARP - MAKES THE COMPUTER ACT AS A ROUTER
+def enable_IP_forwarding():
+    cmd('echo 1 > /proc/sys/net/ipv4/ip_forward')
+
+def disable_IP_forwarding():
+    cmd('echo 0 > /proc/sys/net/ipv4/ip_forward')
 
 """
 [COMMAND LINE UTILITIES] - EXECUTING SHELL COMMANDS
@@ -38,6 +58,10 @@ def get_user_MAC(host_ip):
 
 def cmd( command,root = True):
     call('sudo ' + command if root else command, shell=True)
+   
+
+
+
 
 
 """
@@ -50,13 +74,13 @@ def cmd( command,root = True):
     [*] Based on the Linux manual page:
         [*] These parameters accept a floating point number, possibly followed by either a unit or a float
         [*] If specifying by bits :   bit or a BARE NUMBER
-    
-    TO SOLVE:
-    [*] Create a parser which accepts a string containing number + unit (e.g. 1mbps )
-    [*] Parse and extract the number and unit
-    [*] Convert the number to bare number (bit) based on the unit
               
 """
+
+
+def check_if_root():
+    return os.getuid 
+
   
 def cust_unit_to_barebits(rate):
     _rate = [x for x in rate]
@@ -71,7 +95,7 @@ def cust_unit_to_barebits(rate):
         else:
             unit_chars.append(char)
 
-    speed = ''.join(str(n) for n in speed_nums )
+    speed = int(''.join(str(n) for n in speed_nums ))
     unit = ''.join(unit_chars).lower()
 
     """
@@ -89,11 +113,19 @@ def cust_unit_to_barebits(rate):
     elif unit == 'gb': 
         return speed * 1024 ** 3
     else:
-         raise Exception('Invalid unit')
+         raise click.BadParameter('Invalid unit!')
 
+def create_qdics(interface):
+    cmd('/sbin/tc qdisc add dev {} root handle 1:0 htb'.format(interface))
 
+def delete_qdisc(interface):
+    cmd('/sbin/tc qdisc del dev {} root handle 1:0 htb'.format(interface))
 
+def complete_iptables_reset():
+    cmd('/sbin/iptables --policy INPUT ACCEPT')
+    cmd('/sbin/iptables --policy OUTPUT ACCEPT')
+    cmd('/usr/sbin/iptables --policy FORWARD ACCEPT')
 
-
-
-
+    cmd('/sbin/iptables -Z')
+    cmd('/sbin/iptables -F')
+    cmd('/sbin/iptables -X')
