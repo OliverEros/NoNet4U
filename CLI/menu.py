@@ -95,12 +95,8 @@ def limit(ctx, user, speed, download, upload):
         direction = upload
     else:
         direction = 3
-    a =[user , speed , download ,upload ]
-    click.echo(a)
-    click.echo(direction)
-    direction = 1
     
-    
+    direction  = 3
 
     # Secondly, let's see if all or just certain users need to be limited
     if user[0] == 'all':
@@ -108,12 +104,8 @@ def limit(ctx, user, speed, download, upload):
         if ctx.hosts:
             # Set users to limited
             for user in ctx.hosts:
-                print(user.ip)
-                _limited_user = ctx.limiter.limit(
-                    user, direction, _speed, ctx.limited)
+                _limited_user = ctx.limiter.limit(user, direction, _speed, ctx.limited)
                 ctx.spoofer.add_user(user)
-            
-            print(ctx.limited)
 
         else:
             error_out(
@@ -125,10 +117,10 @@ def limit(ctx, user, speed, download, upload):
                 for _usr in ctx.hosts:
                     if int(_id) == _usr.host_id:
                         # Limit users
-                        _limited_user = ctx.limiter.limit(
-                            _usr, direction, _speed, ctx.limited)
-                        ctx.limited[_usr] = _limited_user
+                        ctx.limiter.limit(_usr, direction, _speed, ctx.limited)
                         ctx.spoofer.add_user(_usr)
+                
+                message_out(str(_usr) + ' is limited to ' + str(speed))
 
         else:
             error_out('No users could be found! Try scanning first (click-scan)')
@@ -144,16 +136,18 @@ def block(ctx, user):
     if ctx.hosts:
         if user[0] == 'all':
             for _id in ctx.hosts:
-                _blocked_user = ctx.limiter.block(_id, ctx.limited)
-                ctx.limited[_id] = _blocked_user
+                ctx.limiter.block(_id, ctx.limited)
+                _id.isSpoofed = True
                 ctx.spoofer.add_user(_id)
         else:
             for _user in user:
-                for _id in ctx.hosts:
-                    if int(_user) == _id:
-                        _blocked_user = ctx.limiter.block(_id, ctx.limited)
-                        ctx.limited[_id] = _blocked_user
+                for _id in list(ctx.hosts):
+                    if int(_user) == _id.host_id:
+                        ctx.limiter.block(_id, ctx.limited)
+                        _id.isSpoofed = True
                         ctx.spoofer.add_user(_id)
+                
+                click.echo(ctx.limited)
 
     else:
         error_out('No users could be found! Try scanning first (click-scan)')
@@ -162,8 +156,6 @@ def block(ctx, user):
 """
 Frees limited users
 """
-
-
 @click.command()
 @click.argument('user', nargs=-1)
 @click.pass_obj
