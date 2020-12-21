@@ -124,8 +124,5 @@ def delete_qdisc(interface):
 def complete_iptables_reset():
     cmd('/sbin/iptables --policy INPUT ACCEPT')
     cmd('/sbin/iptables --policy OUTPUT ACCEPT')
-    cmd('/usr/sbin/iptables --policy FORWARD ACCEPT')
-
-    cmd('/sbin/iptables -Z')
+    cmd('/sbin/iptables --policy FORWARD ACCEPT')
     cmd('/sbin/iptables -F')
-    cmd('/sbin/iptables -X')
