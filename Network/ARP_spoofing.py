@@ -29,12 +29,14 @@ class ARP_spoofer:
         while self.isRunning:
             for user in self.user_set:
                 self.send_spoofed_packets(user)
+                
 
             time.sleep(self.interval)
 
     def start(self):
         thread = threading.Thread(target=self.start_spoofing, args=[])
         self.isRunning = True
+        print('Running')
 
         thread.start()
 
