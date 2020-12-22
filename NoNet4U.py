@@ -22,22 +22,21 @@ def main():
     gateway = get_gateway()
     ip_range = gateway + '/' + str(get_netmask(interface))
 
-    is_root = False
 
     if not check_if_root():
         error_out('You must run as root!')
-        return False
-    else:
-        is_root = True
-
-    if not interface:
+        return
+   
+    elif not interface:
         error_out('Interface could not be loaded')
         return
+
     elif not gateway:
         error_out('Gateway could not be loaded')
         return
     elif enable_IP_forwarding() == False:
         error_out('IP Forwarding could not be enabled!')
+        return
     else:
 
         delete_qdisc(interface)
@@ -51,6 +50,7 @@ def main():
         error_out('Gateway: ' + gateway + '\n')
         
         menu = main_menu(arguments)
+    
 
 if __name__ == "__main__":
     main()
