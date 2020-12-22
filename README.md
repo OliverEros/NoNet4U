@@ -1,6 +1,6 @@
 # NoNet4U
 
-Personal project I have created for learning reasons. The tool is intended to limit network traffic on your LAN using ARP spoofing and
+Personal project I have created for learning purposes. The tool is intended to limit network traffic on your LAN using ARP spoofing and
 Token-Bucket hierarchy. Although the project is nearly finished, there are still bugs that will be fixed in the near future.
 
 ## Requirements:
